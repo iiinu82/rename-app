@@ -1,0 +1,281 @@
+/* --- プレースホルダーの文字色を薄くする設定 --- */
+.pos-input::placeholder,
+.replace-input::placeholder,
+.edit-input::placeholder {
+  color: #cbd5e1; /* お好みに応じて #94a3b8 や #cbd5e1 など薄さを調整してください */
+  opacity: 1; /* ブラウザによる色の自動薄めを防止して指定色を確実に適用するおまじない */
+}
+
+/* --- ハイライト・拡張子部分のスタイル --- */
+.highlight-part {
+  color: #ff6b6b;
+  font-weight: bold;
+  background-color: #ffe3e3;
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+.extension-part {
+  color: #999;
+}
+
+/* --- 全体レイアウト --- */
+.rename-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 4px;
+  font-family: sans-serif;
+  color: #333;
+}
+
+.titleArea {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 2px solid #0070f3;
+}
+.rename-title {
+  padding-bottom: 10px;
+  margin-top: 0;
+}
+
+.titleArea p {
+  font-size: 16px;
+  color: #454545;
+}
+
+.rename-desc {
+  margin-top: 10px;
+  text-align: center;
+  color: #666;
+}
+
+/* --- フォルダ選択ボタン --- */
+.select-folder-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  background-color: #0070f3;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background-color 0.2s;
+}
+
+.select-folder-btn:hover {
+  background-color: #005bb5;
+}
+
+/* --- ⚙️ 一括変換コントロールパネル --- */
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: #f5f5f7;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+}
+
+.panel-title {
+  margin: 0;
+}
+
+.rule-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 16px;
+}
+
+.pos-input {
+  font-size: 20px;
+  width: 50px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.replace-input {
+  font-size: 20px;
+  width: 320px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.date-checkbox {
+  width: 18px;
+  height: 18px;
+}
+
+/* --- 📋 プレビューリスト --- */
+.preview-header {
+  display: flex;
+  font-weight: bold;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 5px;
+}
+
+.preview-col {
+  width: 50%;
+}
+
+.preview-list-area {
+  /* max-height: 400px; */
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.preview-row {
+  font-size: 14px;
+  display: flex;
+  gap: 20px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+}
+
+.preview-cell {
+  width: 50%;
+}
+
+.original-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edit-input {
+  width: 95%;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+.edit-input:focus {
+  border-color: #0070f3;
+}
+
+/* --- 🚀 実行ボタン --- */
+.execute-btn {
+  width: 100%;
+  padding: 15px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.execute-btn:hover {
+  background-color: #218838;
+}
+
+/* ==========================================
+   App.jsx から移行する追加のスタイル
+   ========================================== */
+
+/* 🎛️ モード切替タブのコンテナ */
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+/* モード切替タブのボタン（共通） */
+.mode-tab-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+/* 🔄 仮リネームボタン */
+.temp-rename-btn {
+  padding: 8px 16px;
+  background-color: #ffc107;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.temp-rename-btn:hover {
+  background-color: #e0a800;
+}
+
+/* ✂️ 挿入モードのハイライト（破線の区切り線） */
+.insert-highlight-line {
+  border-left: 2px dashed #ff6b6b;
+  margin: 0 1px;
+}
+/* --- 📁 ドラッグ＆ドロップゾーン --- */
+.drop-zone {
+  width: 100%;
+  max-width: 600px;
+  height: 220px;
+  margin: 40px auto;
+  border: 2px dashed #cbd5e1; /* 上品なシルバーグレーの点線 */
+  border-radius: 12px;
+  background-color: #f8fafc; /* ごく薄いグレー・ブルー系の背景 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+  cursor: pointer;
+}
+
+/* ファイルが上にドラッグされてきたときの演出用（のちほどJSでクラスを付けられます） */
+.drop-zone.drag-over {
+  border-color: #0070f3;
+  background-color: #f0f7ff;
+}
+
+.drop-zone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.drop-zone-text {
+  font-size: 18px;
+  font-weight: bold;
+  color: #475569;
+  margin: 0;
+}
+
+.drop-zone-subtext {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ドロップゾーン内のボタンの微調整（既存の .select-folder-btn を活かしつつ余白を調整） */
+.drop-zone .select-folder-btn {
+  margin-bottom: 0;
+}

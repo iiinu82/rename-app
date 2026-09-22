@@ -149,7 +149,7 @@
 }
 
 .preview-list-area {
-  /* max-height: 400px; */
+  max-height: 400px;
   overflow-y: auto;
   margin-bottom: 20px;
 }
@@ -227,7 +227,18 @@
 }
 
 /* 🔄 仮リネームボタン */
-.temp-rename-btn {
+.tempRenameBtnArea {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tempRenameBtnDesc {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.tempRenameBtn {
   padding: 10px 16px;
   background-color: #f7e9c1;
   color: #333;
@@ -238,7 +249,7 @@
   transition: background-color 0.2s;
 }
 
-.temp-rename-btn:hover {
+.tempRenameBtn:hover {
   background-color: #efbb2b;
 }
 

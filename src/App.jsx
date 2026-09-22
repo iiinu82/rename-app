@@ -395,13 +395,18 @@ export default function App() {
               </div>
 
               {/* 仮リネームボタン */}
-              <button
-                onClick={handleTemporaryRename}
-                className="temp-rename-btn"
-                title="現在のプレビュー結果を次のベース名として確定し、入力をリセットします"
-              >
-                変更を一旦保存する(まだリネームはされません)
-              </button>
+              <div className="tempRenameBtnArea">
+                <span className="tempRenameBtnDesc">
+                  ※1工程終わるごとに押して下さい（まだリネームはされません）→
+                </span>
+                <button
+                  onClick={handleTemporaryRename}
+                  className="tempRenameBtn"
+                  title="現在のプレビュー結果を次のベース名として確定し、入力をリセットします"
+                >
+                  変更を一旦保存する
+                </button>
+              </div>
             </div>
 
             {/* 📋 モード1: 置換モードの入力エリア */}
@@ -493,7 +498,7 @@ export default function App() {
                 <div
                   key={index}
                   className="preview-row"
-                  style={{ opacity: file.isChecked ? 1 : 0.4 }} // チェック外れたら少し薄くする親切設計
+                  style={{ opacity: file.isChecked ? 1 : 0.7 }} // チェック外れたら少し薄くする親切設計
                 >
                   {/* 左：チェックボックス ＋ リアルタイムハイライト */}
                   <div

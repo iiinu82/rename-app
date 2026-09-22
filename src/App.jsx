@@ -267,6 +267,12 @@ export default function App() {
   // 💾 実際にパソコン内のファイル名を一括で書き換える処理（チェックされたファイルのみ）
   const handleRenameExecute = async () => {
     if (files.length === 0) return;
+    const isConfirmed = window.confirm(
+      "本当に一括リネームを実行しますか？\n(※チェックの入っていないファイルも変更後のファイル名に変更されます)",
+    );
+
+    // キャンセルされたらここで処理をストップ
+    if (!isConfirmed) return;
 
     try {
       for (const file of files) {
@@ -301,9 +307,27 @@ export default function App() {
         <h1 className="rename-title">一括リネームツール</h1>
         <p>ファイル整理を圧倒的に効率化する一括リネームツール</p>
       </div>
-      <p className="rename-desc">
-        ※ファイルはサーバーにアップロードされず、あなたのブラウザ内だけで安全に処理されます。
-      </p>
+      <div className="secondArea">
+        {files.length !== 0 ? (
+          <button
+            className="select-folder-btn"
+            onClick={handleSelectFolder}
+            style={{ marginBottom: "20px" }}
+          >
+            別のフォルダを選択し直す
+          </button>
+        ) : (
+          ""
+        )}
+        <div className="descArea">
+          <p className="rename-desc">
+            ※ファイルはサーバーにアップロードされず、あなたのブラウザ内だけで安全に処理されます。
+          </p>
+          <p className="rename-desc">
+            ※ブラウザによってはフォルダが選択出来ない場合があります。ChromeやEdgeでお試し下さい。
+          </p>
+        </div>
+      </div>
 
       {files.length === 0 ? (
         <div
@@ -321,14 +345,15 @@ export default function App() {
           </div>
         </div>
       ) : (
+        ""
         // ファイルが読み込まれた後は、コンパクトなボタンや再選択用に上部に残すこともできます
-        <button
-          className="select-folder-btn"
-          onClick={handleSelectFolder}
-          style={{ marginBottom: "20px" }}
-        >
-          📂 別のフォルダを選択し直す
-        </button>
+        // <button
+        //   className="select-folder-btn"
+        //   onClick={handleSelectFolder}
+        //   style={{ marginBottom: "20px" }}
+        // >
+        //   別のフォルダを選択し直す
+        // </button>
       )}
 
       {files.length > 0 && (
@@ -375,7 +400,7 @@ export default function App() {
                 className="temp-rename-btn"
                 title="現在のプレビュー結果を次のベース名として確定し、入力をリセットします"
               >
-                🔄 仮リネーム（次へ）
+                変更を一旦保存する(まだリネームはされません)
               </button>
             </div>
 
@@ -523,7 +548,7 @@ export default function App() {
 
           {/* 🚀 実行ボタン */}
           <button className="execute-btn" onClick={handleRenameExecute}>
-            ⚡ この内容で一括リネームを実行する（やり直し不可）
+            この内容で一括リネームを実行する
           </button>
         </>
       )}

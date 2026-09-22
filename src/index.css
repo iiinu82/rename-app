@@ -29,7 +29,7 @@ a {
 
 /* 青ボタン */
 .bluebtn {
-  background-color: #78a6be;
+  background-color: #3990c0;
   color: #fff;
   border: none;
   transition:
@@ -38,13 +38,13 @@ a {
 }
 
 .bluebtn:hover {
-  background-color: #3990c0;
+  background-color: #78a6be;
   transform: translateY(-1px);
 }
 
 /* 緑ボタン */
 .greenbtn {
-  background-color: var(--color-primary, #78be7f);
+  background-color: var(--color-primary, #9ad641);
   color: #ffffff;
   border: none;
   transition:
@@ -53,7 +53,7 @@ a {
 }
 
 .greenbtn:hover {
-  background-color: #38bd45;
+  background-color: #a7d364;
   transform: translateY(-1px);
 }
 

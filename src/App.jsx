@@ -1,73 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./App.css";
-
-// 🌟 ファイル名の一部をリアルタイムにハイライト表示するコンポーネント
-function HighlightedFileName({
-  targetName,
-  startPos,
-  endPos,
-  activeMode,
-  insertPos,
-  isChecked,
-}) {
-  if (!isChecked) {
-    return <span>{targetName}</span>;
-  }
-  const dotIndex = targetName.lastIndexOf(".");
-  const baseName = dotIndex !== -1 ? targetName.slice(0, dotIndex) : targetName;
-  const extension = dotIndex !== -1 ? targetName.slice(dotIndex) : "";
-
-  // 1. 置換モードのハイライト
-  if (activeMode === "replace") {
-    const start = parseInt(startPos, 10);
-    const end = parseInt(endPos, 10);
-
-    if (
-      isNaN(start) ||
-      isNaN(end) ||
-      start <= 0 ||
-      end < start ||
-      start > baseName.length
-    ) {
-      return <span>{targetName}</span>;
-    }
-
-    const part1 = baseName.slice(0, start - 1);
-    const part2 = baseName.slice(start - 1, end);
-    const part3 = baseName.slice(end);
-
-    return (
-      <span>
-        {part1}
-        <span className="highlight-part">{part2}</span>
-        {part3}
-        <span className="extension-part">{extension}</span>
-      </span>
-    );
-  }
-
-  // 2. 挿入モードのハイライト
-  if (activeMode === "insert") {
-    const pos = parseInt(insertPos, 10);
-    if (isNaN(pos) || pos < 0 || pos > baseName.length) {
-      return <span>{targetName}</span>;
-    }
-
-    const part1 = baseName.slice(0, pos - 1);
-    const part2 = baseName.slice(pos - 1);
-
-    return (
-      <span>
-        {part1}
-        <span className="insert-highlight-line"></span>
-        {part2}
-        <span className="extension-part">{extension}</span>
-      </span>
-    );
-  }
-
-  return <span>{targetName}</span>;
-}
+import ModeButton from "./components/ModeButton";
+import HighlightedFileName from "./components/HighlightedFileName";
 
 export default function App() {
   const [files, setFiles] = useState([]);
@@ -79,6 +13,12 @@ export default function App() {
 
   const [insertPos, setInsertPos] = useState("");
   const [insertStr, setInsertStr] = useState("");
+
+  const [swapStart1, setSwapStart1] = useState("");
+  const [swapEnd1, setSwapEnd1] = useState("");
+  const [swapStart2, setSwapStart2] = useState("");
+  const [swapEnd2, setSwapEnd2] = useState("");
+
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   const processAndSetFiles = (fileList) => {
@@ -91,7 +31,7 @@ export default function App() {
     setFiles(fileList);
   };
 
-  // 📁 フォルダを選択してファイル名を取り込む処理（自然順ソート ＆ デフォルトでチェックON）
+  // 📁 フォルダを選択してファイル名を取り込む処理
   const handleSelectFolder = async () => {
     try {
       const directoryHandle = await window.showDirectoryPicker();
@@ -129,12 +69,10 @@ export default function App() {
 
       // ドロップされたアイテム（フォルダまたはファイル）を走査
       for (const item of items) {
-        // File System Access API の Handle を取得
         if (item.getAsFileSystemHandle) {
           const handle = await item.getAsFileSystemHandle();
 
           if (handle.kind === "directory") {
-            // フォルダがドロップされた場合：中のファイルをすべて読み込む
             for await (const entry of handle.values()) {
               if (entry.kind === "file") {
                 fileList.push({
@@ -147,7 +85,6 @@ export default function App() {
               }
             }
           } else if (handle.kind === "file") {
-            // ファイルが直接ドロップされた場合（複数対応）
             fileList.push({
               handle: handle,
               originalName: handle.name,
@@ -183,12 +120,19 @@ export default function App() {
   };
 
   // 🔄 一括変換ルールに基づいて「新しい名前」をリアルタイム計算する関数
+  // 🔄 一括変換ルールに基づいて「新しい名前」をリアルタイム計算する関数
   const generateNewName = (baseTargetName) => {
-    // ★ ガード：置換も挿入も何もルールが入力されていなければ、何もしずそのままの名前を返す！
+    // 各モードのガード（何も入力されていなければそのまま返す）
     if (activeMode === "replace" && !startPos && !endPos && !replaceStr) {
       return baseTargetName;
     }
     if (activeMode === "insert" && !insertPos && !insertStr) {
+      return baseTargetName;
+    }
+    if (
+      activeMode === "change" &&
+      (!swapStart1 || !swapEnd1 || !swapStart2 || !swapEnd2)
+    ) {
       return baseTargetName;
     }
 
@@ -197,6 +141,7 @@ export default function App() {
       dotIndex !== -1 ? baseTargetName.slice(0, dotIndex) : baseTargetName;
     const extension = dotIndex !== -1 ? baseTargetName.slice(dotIndex) : "";
 
+    // 1. 置換モード
     if (activeMode === "replace") {
       const start = parseInt(startPos, 10);
       const end = parseInt(endPos, 10);
@@ -205,7 +150,9 @@ export default function App() {
         const after = baseName.slice(end);
         baseName = before + replaceStr + after;
       }
-    } else if (activeMode === "insert") {
+    }
+    // 2. 挿入モード
+    else if (activeMode === "insert") {
       const pos = parseInt(insertPos, 10);
       if (!isNaN(pos) && pos >= 0 && pos <= baseName.length + 1) {
         const before = baseName.slice(0, pos - 1);
@@ -213,27 +160,56 @@ export default function App() {
         baseName = before + insertStr + after;
       }
     }
+    // 3. ★ 新機能：交換モード (change)
+    else if (activeMode === "change") {
+      const s1 = parseInt(swapStart1, 10);
+      const e1 = parseInt(swapEnd1, 10);
+      const s2 = parseInt(swapStart2, 10);
+      const e2 = parseInt(swapEnd2, 10);
+
+      // バリデーション ＆ 範囲の重複チェック（第1の終わりが第2の始まり以上なら何もしない）
+      if (
+        !isNaN(s1) &&
+        !isNaN(e1) &&
+        s1 > 0 &&
+        e1 >= s1 &&
+        s1 <= baseName.length &&
+        !isNaN(s2) &&
+        !isNaN(e2) &&
+        s2 > 0 &&
+        e2 >= s2 &&
+        s2 <= baseName.length &&
+        e1 < s2
+      ) {
+        const p1 = baseName.slice(0, s1 - 1);
+        const target1 = baseName.slice(s1 - 1, e1); // 1つ目の塊
+        const p2 = baseName.slice(e1, s2 - 1); // 間の文字
+        const target2 = baseName.slice(s2 - 1, e2); // 2つ目の塊
+        const p3 = baseName.slice(e2); // 後ろの残り
+
+        // ★ 順番を入れ替えて結合する（target1 と target2 をスワップ！）
+        baseName = p1 + target2 + p2 + target1 + p3;
+      }
+    }
 
     return baseName + extension;
   };
 
-  // 🔄 仮リネーム処理（チェックが入っているファイルだけ対象にする）
+  // 🔄 仮リネーム処理
   const handleTemporaryRename = () => {
     if (files.length === 0) return;
 
     const updatedFiles = files.map((file) => {
-      // ★ チェックが外れているファイルは、仮リネームの対象外として一切変更せずそのまま返す！
       if (!file.isChecked) {
         return file;
       }
 
-      // チェックが入っているファイルだけ、現在のプレビュー結果を次のベース名に昇格させる
       const currentPreview =
         file.customName || generateNewName(file.currentName);
       return {
         ...file,
         currentName: currentPreview,
-        customName: "", // カスタム入力はクリア
+        customName: "",
       };
     });
 
@@ -245,17 +221,20 @@ export default function App() {
     });
 
     setFiles(updatedFiles);
-    // 入力ルールをリセット
+
     setStartPos("");
     setEndPos("");
     setReplaceStr("");
     setInsertPos("");
     setInsertStr("");
+    setSwapStart1("");
+    setSwapEnd1("");
+    setSwapStart2("");
+    setSwapEnd2("");
   };
 
-  // 🎛️ すべてのチェックをON/OFF切り替えるトグル関数
+  // すべてのチェックをON/OFF切り替えるトグル関数
   const handleToggleAllCheck = () => {
-    // すべてチェックされているか判定し、されていれば全解除、そうでなければ全選択にする
     const allChecked = files.every((file) => file.isChecked);
     const updatedFiles = files.map((file) => ({
       ...file,
@@ -264,29 +243,23 @@ export default function App() {
     setFiles(updatedFiles);
   };
 
-  // 💾 実際にパソコン内のファイル名を一括で書き換える処理（チェックされたファイルのみ）
+  // 💾 実際にパソコン内のファイル名を一括で書き換える処理
   const handleRenameExecute = async () => {
     if (files.length === 0) return;
     const isConfirmed = window.confirm(
       "本当に一括リネームを実行しますか？\n(※チェックの入っていないファイルも変更後のファイル名に変更されます)",
     );
 
-    // キャンセルされたらここで処理をストップ
     if (!isConfirmed) return;
 
     try {
       for (const file of files) {
-        // ★ 修正ポイント：
-        // もしチェックが外れているファイルなら、一括ルールやカスタム入力を一切無視して、
-        // 「現在の currentName（これまでに仮リネームで確定した名前）」をそのまま最終名にする！
         let finalName = file.currentName;
 
         if (file.isChecked) {
-          // チェックが入っているファイルだけ、カスタム名または現在のルールを適用した名前にする
           finalName = file.customName || generateNewName(file.currentName);
         }
 
-        // 最初の名前（originalName）と違う場合のみ、パソコン内の実ファイルを移動する
         if (file.originalName !== finalName) {
           await file.handle.move(finalName);
         }
@@ -301,16 +274,37 @@ export default function App() {
     }
   };
 
+  // 入力した文字数のバリデーション(入力したデータ,setする関数)
+  const handleNumberChange = (e, setterFunction) => {
+    const val = e.target.value;
+
+    // ① 空文字は許可する
+    if (val === "") {
+      setterFunction("");
+      return;
+    }
+
+    const num = parseInt(val, 10);
+
+    // ② 1未満（0やマイナス）または数字でなければ弾く
+    if (isNaN(num) || num < 1) {
+      return;
+    }
+
+    // ③ 1以上ならセットする
+    setterFunction(num.toString());
+  };
+
   return (
-    <div className="rename-container">
+    <div className="renameContainer">
       <div className="titleArea">
-        <h1 className="rename-title">一括リネームツール</h1>
+        <h1 className="renameTitle">一括リネームツール</h1>
         <p>ファイル整理を圧倒的に効率化する一括リネームツール</p>
       </div>
       <div className="secondArea">
         {files.length !== 0 ? (
           <button
-            className="select-folder-btn"
+            className="selectFolderBtn"
             onClick={handleSelectFolder}
             style={{ marginBottom: "20px" }}
           >
@@ -339,59 +333,46 @@ export default function App() {
           <div className="drop-zone-content">
             <p className="drop-zone-text">ここにフォルダをドロップ</p>
             <span className="drop-zone-subtext">または</span>
-            <button className="select-folder-btn" onClick={handleSelectFolder}>
+            <button className="selectFolderBtn" onClick={handleSelectFolder}>
               📂 フォルダを選択する
             </button>
           </div>
         </div>
       ) : (
         ""
-        // ファイルが読み込まれた後は、コンパクトなボタンや再選択用に上部に残すこともできます
-        // <button
-        //   className="select-folder-btn"
-        //   onClick={handleSelectFolder}
-        //   style={{ marginBottom: "20px" }}
-        // >
-        //   別のフォルダを選択し直す
-        // </button>
       )}
 
       {files.length > 0 && (
         <>
-          {/* ⚙️ 一括変換コントロールパネル */}
-          <div className="control-panel">
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "10px",
-              }}
-            >
-              {/* 🎛️ モード切替タブ */}
-              <div className="mode-tabs">
-                <button
-                  onClick={() => setActiveMode("replace")}
-                  className="mode-tab-btn"
-                  style={{
-                    backgroundColor:
-                      activeMode === "replace" ? "#0070f3" : "#e0e0e0",
-                    color: activeMode === "replace" ? "#fff" : "#333",
-                  }}
+          {/* 一括変換コントロールパネル */}
+          <div className="controlPanel">
+            <div className="topArea">
+              {/* モード切替タブ */}
+              <div className="modeTabs">
+                <ModeButton
+                  activeMode={activeMode}
+                  setActiveMode={setActiveMode}
+                  mode="replace"
+                  children
                 >
                   置換
-                </button>
-                <button
-                  onClick={() => setActiveMode("insert")}
-                  className="mode-tab-btn"
-                  style={{
-                    backgroundColor:
-                      activeMode === "insert" ? "#0070f3" : "#e0e0e0",
-                    color: activeMode === "insert" ? "#fff" : "#333",
-                  }}
+                </ModeButton>
+                <ModeButton
+                  activeMode={activeMode}
+                  setActiveMode={setActiveMode}
+                  mode="insert"
+                  children
                 >
                   文字挿入
-                </button>
+                </ModeButton>
+                <ModeButton
+                  activeMode={activeMode}
+                  setActiveMode={setActiveMode}
+                  mode="change"
+                  children
+                >
+                  交換
+                </ModeButton>
               </div>
 
               {/* 仮リネームボタン */}
@@ -409,28 +390,28 @@ export default function App() {
               </div>
             </div>
 
-            {/* 📋 モード1: 置換モードの入力エリア */}
+            {/* モード1: 置換モードの入力エリア */}
             {activeMode === "replace" && (
-              <div className="rule-row">
+              <div className="ruleRow">
                 <input
                   type="number"
-                  className="pos-input"
+                  className="posInput"
                   value={startPos}
-                  onChange={(e) => setStartPos(e.target.value)}
+                  onChange={(e) => handleNumberChange(e, setStartPos)}
                   placeholder="1"
                 />
                 <span>文字目 から </span>
                 <input
                   type="number"
-                  className="pos-input"
+                  className="posInput"
                   value={endPos}
-                  onChange={(e) => setEndPos(e.target.value)}
+                  onChange={(e) => handleNumberChange(e, setEndPos)}
                   placeholder="2"
                 />
                 <span>文字目を、</span>
                 <input
                   type="text"
-                  className="replace-input"
+                  className="replaceInput"
                   value={replaceStr}
                   onChange={(e) => setReplaceStr(e.target.value)}
                   placeholder="✕✕"
@@ -439,20 +420,22 @@ export default function App() {
               </div>
             )}
 
-            {/* 📋 モード2: 挿入モードの入力エリア */}
+            {/* モード2: 挿入モードの入力エリア */}
             {activeMode === "insert" && (
               <div className="rule-row">
                 <input
                   type="number"
-                  className="pos-input"
+                  className="posInput"
                   value={insertPos}
-                  onChange={(e) => setInsertPos(e.target.value)}
+                  onChange={(e) => handleNumberChange(e, setInsertPos)}
                   placeholder="0"
+                  min="1"
+                  step="1"
                 />
                 <span>文字目の前に、</span>
                 <input
                   type="text"
-                  className="replace-input"
+                  className="replaceInput"
                   value={insertStr}
                   onChange={(e) => setInsertStr(e.target.value)}
                   placeholder="追加する文字"
@@ -460,36 +443,65 @@ export default function App() {
                 <span>を挿入する</span>
               </div>
             )}
+            {/* 📋 モード3: 交換モードの入力エリア (change) */}
+            {activeMode === "change" && (
+              <div
+                className="rule-row"
+                style={{ flexWrap: "wrap", gap: "6px" }}
+              >
+                <span>左から</span>
+                <input
+                  type="number"
+                  className="posInput"
+                  value={swapStart1}
+                  onChange={(e) => handleNumberChange(e, setSwapStart1)}
+                  placeholder="1"
+                />
+                <span>文字目 〜 </span>
+                <input
+                  type="number"
+                  className="posInput"
+                  value={swapEnd1}
+                  onChange={(e) => handleNumberChange(e, setSwapEnd1)}
+                  placeholder="2"
+                />
+                <span>文字目 と、</span>
+                <span style={{ marginLeft: "4px" }}>左から</span>
+                <input
+                  type="number"
+                  className="posInput"
+                  value={swapStart2}
+                  onChange={(e) => handleNumberChange(e, setSwapStart2)}
+                  placeholder="5"
+                />
+                <span>文字目 〜 </span>
+                <input
+                  type="number"
+                  className="posInput"
+                  value={swapEnd2}
+                  onChange={(e) => handleNumberChange(e, setSwapEnd2)}
+                  placeholder="6"
+                />
+                <span>文字目を入れ替える</span>
+              </div>
+            )}
           </div>
 
           {/* 📋 プレビューリスト */}
-          <div className="preview-header">
-            <div
-              className="preview-col"
-              style={{ display: "flex", alignItems: "center", gap: "10px" }}
-            >
+          <div className="previewHeader">
+            <div className="previewCol">
               <span>現在のファイル名（変更対象）</span>
               {/* ★ すべてのチェックを切り替えるボタン */}
-              <button
-                onClick={handleToggleAllCheck}
-                style={{
-                  padding: "2px 8px",
-                  fontSize: "12px",
-                  backgroundColor: "#e2e8f0",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                }}
-              >
+              <button onClick={handleToggleAllCheck} className="toggleCheckBtn">
                 {files.every((f) => f.isChecked) ? "すべて解除" : "すべて選択"}
               </button>
             </div>
-            <div className="preview-col">
+            <div className="previewCol">
               変更後のファイル名（手動で微調整も可能）
             </div>
           </div>
 
-          <div className="preview-list-area">
+          <div className="previewListArea">
             {files.map((file, index) => {
               const currentPreview = !file.isChecked
                 ? file.currentName
@@ -497,18 +509,11 @@ export default function App() {
               return (
                 <div
                   key={index}
-                  className="preview-row"
-                  style={{ opacity: file.isChecked ? 1 : 0.7 }} // チェック外れたら少し薄くする親切設計
+                  className="previewRow"
+                  style={{ opacity: file.isChecked ? 1 : 0.7 }} // チェック外れたら少し薄くする
                 >
                   {/* 左：チェックボックス ＋ リアルタイムハイライト */}
-                  <div
-                    className="preview-cell original-cell"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
+                  <div className="previewCell originalCell">
                     <input
                       type="checkbox"
                       checked={file.isChecked}
@@ -516,11 +521,6 @@ export default function App() {
                         const newFiles = [...files];
                         newFiles[index].isChecked = e.target.checked;
                         setFiles(newFiles);
-                      }}
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        cursor: "pointer",
                       }}
                     />
                     <HighlightedFileName
@@ -530,15 +530,19 @@ export default function App() {
                       activeMode={activeMode}
                       insertPos={insertPos}
                       isChecked={file.isChecked}
+                      swapStart1={swapStart1}
+                      swapEnd1={swapEnd1}
+                      swapStart2={swapStart2}
+                      swapEnd2={swapEnd2}
                     />
                   </div>
                   {/* 右：変更後の入力フォーム */}
-                  <div className="preview-cell edit-cell">
+                  <div className="previewCell edit-cell">
                     <input
                       type="text"
-                      className="edit-input"
+                      className="editInput"
                       value={currentPreview}
-                      disabled={!file.isChecked} // チェック外れたら入力も無効化する
+                      disabled={!file.isChecked}
                       onChange={(e) => {
                         const newFiles = [...files];
                         newFiles[index].customName = e.target.value;
@@ -552,7 +556,7 @@ export default function App() {
           </div>
 
           {/* 🚀 実行ボタン */}
-          <button className="execute-btn" onClick={handleRenameExecute}>
+          <button className="executeBtn" onClick={handleRenameExecute}>
             この内容で一括リネームを実行する
           </button>
         </>

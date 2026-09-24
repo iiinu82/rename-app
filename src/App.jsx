@@ -141,7 +141,7 @@ export default function App() {
     <div className="renameContainer">
       <div className="titleArea">
         <h1 className="renameTitle">一括リネームツール</h1>
-        <p>ファイル整理を圧倒的に効率化する一括リネームツール</p>
+        <p>複数のファイル名を一気に変更する</p>
       </div>
       <div className="secondArea">
         {files.length !== 0 ? (
@@ -223,7 +223,7 @@ export default function App() {
               {/* 仮リネームボタン */}
               <div className="tempRenameBtnArea">
                 <span className="tempRenameBtnDesc">
-                  ※1工程終わるごとに押して下さい（まだリネームはされません）→
+                  ※ひと工程が終わるごとに押して下さい（まだリネームはされません）→
                 </span>
                 <button
                   onClick={() =>
@@ -274,7 +274,7 @@ export default function App() {
                   className="replaceInput"
                   value={replaceStr}
                   onChange={(e) => setReplaceStr(e.target.value)}
-                  placeholder="✕✕"
+                  placeholder="置き換える文字"
                 />
                 <span>に変える（空欄で削除）</span>
               </div>
@@ -306,7 +306,6 @@ export default function App() {
             {/* 📋 モード3: 交換モードの入力エリア (change) */}
             {activeMode === "change" && (
               <div className="ruleRow">
-                <span>左から</span>
                 <input
                   type="number"
                   className="posInput changeInput1"
@@ -323,7 +322,6 @@ export default function App() {
                   placeholder="2"
                 />
                 <span>文字目 と、</span>
-                <span>左から</span>
                 <input
                   type="number"
                   className="posInput changeInput2"
@@ -434,6 +432,8 @@ export default function App() {
           >
             この内容で一括リネームを実行する
           </button>
+
+          <footer>© 2026 T.Kawakatsu All Rights Reserved.</footer>
         </>
       )}
     </div>

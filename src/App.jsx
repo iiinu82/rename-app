@@ -266,6 +266,15 @@ export default function App() {
       }
       alert("すべてのファイルのリネームが完了しました！");
       setFiles([]);
+      setStartPos("");
+      setEndPos("");
+      setReplaceStr("");
+      setInsertPos("");
+      setInsertStr("");
+      setSwapStart1("");
+      setSwapEnd1("");
+      setSwapStart2("");
+      setSwapEnd2("");
     } catch (err) {
       console.error("リネーム処理中にエラーが発生しました", err);
       alert(

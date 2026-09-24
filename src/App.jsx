@@ -6,6 +6,12 @@ import {
   handleTemporaryRename,
   handleRenameExecute,
 } from "./components/renameActions";
+import {
+  handleSelectFolder,
+  handleDrop,
+  handleDragOver,
+  handleDragLeave,
+} from "./components/handleFolder";
 
 export default function App() {
   const [files, setFiles] = useState([]);
@@ -25,105 +31,6 @@ export default function App() {
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
-  const processAndSetFiles = (fileList) => {
-    fileList.sort((a, b) => {
-      return a.originalName.localeCompare(b.originalName, undefined, {
-        numeric: true,
-        sensitivity: "base",
-      });
-    });
-    setFiles(fileList);
-  };
-
-  // 📁 フォルダを選択してファイル名を取り込む処理
-  const handleSelectFolder = async () => {
-    try {
-      const directoryHandle = await window.showDirectoryPicker();
-      const fileList = [];
-      for await (const entry of directoryHandle.values()) {
-        if (entry.kind === "file") {
-          fileList.push({
-            handle: entry,
-            originalName: entry.name,
-            currentName: entry.name,
-            customName: "",
-            isChecked: true,
-          });
-        }
-      }
-
-      processAndSetFiles(fileList);
-    } catch (err) {
-      console.error(
-        "フォルダの選択がキャンセルされたか、エラーが発生しました",
-        err,
-      );
-    }
-  };
-  const handleDrop = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDraggingOver(false);
-
-    try {
-      const items = e.dataTransfer.items;
-      if (!items || items.length === 0) return;
-
-      const fileList = [];
-
-      // ドロップされたアイテム（フォルダまたはファイル）を走査
-      for (const item of items) {
-        if (item.getAsFileSystemHandle) {
-          const handle = await item.getAsFileSystemHandle();
-
-          if (handle.kind === "directory") {
-            for await (const entry of handle.values()) {
-              if (entry.kind === "file") {
-                fileList.push({
-                  handle: entry,
-                  originalName: entry.name,
-                  currentName: entry.name,
-                  customName: "",
-                  isChecked: true,
-                });
-              }
-            }
-          } else if (handle.kind === "file") {
-            fileList.push({
-              handle: handle,
-              originalName: handle.name,
-              currentName: handle.name,
-              customName: "",
-              isChecked: true,
-            });
-          }
-        }
-      }
-
-      if (fileList.length > 0) {
-        processAndSetFiles(fileList);
-      } else {
-        alert("有効なファイルまたはフォルダが見つかりませんでした。");
-      }
-    } catch (err) {
-      console.error("ドロップ処理中にエラーが発生しました", err);
-      alert("ファイルの読み込みに失敗しました。");
-    }
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDraggingOver(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDraggingOver(false);
-  };
-
-  // 🔄 一括変換ルールに基づいて「新しい名前」をリアルタイム計算する関数
   // 🔄 一括変換ルールに基づいて「新しい名前」をリアルタイム計算する関数
   const generateNewName = (baseTargetName) => {
     // 各モードのガード（何も入力されていなければそのまま返す）
@@ -240,7 +147,7 @@ export default function App() {
         {files.length !== 0 ? (
           <button
             className="selectFolderBtn"
-            onClick={handleSelectFolder}
+            onClick={() => handleSelectFolder(setFiles)}
             style={{ marginBottom: "20px" }}
           >
             別のフォルダを選択し直す
@@ -261,14 +168,17 @@ export default function App() {
       {files.length === 0 ? (
         <div
           className={`drop-zone ${isDraggingOver ? "drag-over" : ""}`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
+          onDragOver={(e) => handleDragOver(e, setIsDraggingOver)}
+          onDragLeave={(e) => handleDragLeave(e, setIsDraggingOver)}
+          onDrop={(e) => handleDrop(e, setIsDraggingOver, setFiles)}
         >
           <div className="drop-zone-content">
             <p className="drop-zone-text">ここにフォルダをドロップ</p>
             <span className="drop-zone-subtext">または</span>
-            <button className="selectFolderBtn" onClick={handleSelectFolder}>
+            <button
+              className="selectFolderBtn"
+              onClick={() => handleSelectFolder(setFiles)}
+            >
               📂 フォルダを選択する
             </button>
           </div>

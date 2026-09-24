@@ -2,6 +2,10 @@ import { useState } from "react";
 import "./App.css";
 import ModeButton from "./components/ModeButton";
 import HighlightedFileName from "./components/HighlightedFileName";
+import {
+  handleTemporaryRename,
+  handleRenameExecute,
+} from "./components/renameActions";
 
 export default function App() {
   const [files, setFiles] = useState([]);
@@ -195,44 +199,6 @@ export default function App() {
     return baseName + extension;
   };
 
-  // 🔄 仮リネーム処理
-  const handleTemporaryRename = () => {
-    if (files.length === 0) return;
-
-    const updatedFiles = files.map((file) => {
-      if (!file.isChecked) {
-        return file;
-      }
-
-      const currentPreview =
-        file.customName || generateNewName(file.currentName);
-      return {
-        ...file,
-        currentName: currentPreview,
-        customName: "",
-      };
-    });
-
-    updatedFiles.sort((a, b) => {
-      return a.currentName.localeCompare(b.currentName, undefined, {
-        numeric: true,
-        sensitivity: "base",
-      });
-    });
-
-    setFiles(updatedFiles);
-
-    setStartPos("");
-    setEndPos("");
-    setReplaceStr("");
-    setInsertPos("");
-    setInsertStr("");
-    setSwapStart1("");
-    setSwapEnd1("");
-    setSwapStart2("");
-    setSwapEnd2("");
-  };
-
   // すべてのチェックをON/OFF切り替えるトグル関数
   const handleToggleAllCheck = () => {
     const allChecked = files.every((file) => file.isChecked);
@@ -241,46 +207,6 @@ export default function App() {
       isChecked: !allChecked,
     }));
     setFiles(updatedFiles);
-  };
-
-  // 💾 実際にパソコン内のファイル名を一括で書き換える処理
-  const handleRenameExecute = async () => {
-    if (files.length === 0) return;
-    const isConfirmed = window.confirm(
-      "本当に一括リネームを実行しますか？\n(※チェックの入っていないファイルも変更後のファイル名に変更されます)",
-    );
-
-    if (!isConfirmed) return;
-
-    try {
-      for (const file of files) {
-        let finalName = file.currentName;
-
-        if (file.isChecked) {
-          finalName = file.customName || generateNewName(file.currentName);
-        }
-
-        if (file.originalName !== finalName) {
-          await file.handle.move(finalName);
-        }
-      }
-      alert("すべてのファイルのリネームが完了しました！");
-      setFiles([]);
-      setStartPos("");
-      setEndPos("");
-      setReplaceStr("");
-      setInsertPos("");
-      setInsertStr("");
-      setSwapStart1("");
-      setSwapEnd1("");
-      setSwapStart2("");
-      setSwapEnd2("");
-    } catch (err) {
-      console.error("リネーム処理中にエラーが発生しました", err);
-      alert(
-        "エラーが発生しました。フォルダへの書き込み権限を確認してください。",
-      );
-    }
   };
 
   // 入力した文字数のバリデーション(入力したデータ,setする関数)
@@ -390,7 +316,22 @@ export default function App() {
                   ※1工程終わるごとに押して下さい（まだリネームはされません）→
                 </span>
                 <button
-                  onClick={handleTemporaryRename}
+                  onClick={() =>
+                    handleTemporaryRename({
+                      files,
+                      setFiles,
+                      generateNewName,
+                      setStartPos,
+                      setEndPos,
+                      setReplaceStr,
+                      setInsertPos,
+                      setInsertStr,
+                      setSwapStart1,
+                      setSwapEnd1,
+                      setSwapStart2,
+                      setSwapEnd2,
+                    })
+                  }
                   className="tempRenameBtn"
                   title="現在のプレビュー結果を次のベース名として確定し、入力をリセットします"
                 >
@@ -454,39 +395,36 @@ export default function App() {
             )}
             {/* 📋 モード3: 交換モードの入力エリア (change) */}
             {activeMode === "change" && (
-              <div
-                className="rule-row"
-                style={{ flexWrap: "wrap", gap: "6px" }}
-              >
+              <div className="ruleRow">
                 <span>左から</span>
                 <input
                   type="number"
-                  className="posInput"
+                  className="posInput changeInput1"
                   value={swapStart1}
                   onChange={(e) => handleNumberChange(e, setSwapStart1)}
                   placeholder="1"
                 />
-                <span>文字目 〜 </span>
+                <span>文字目 から </span>
                 <input
                   type="number"
-                  className="posInput"
+                  className="posInput changeInput1"
                   value={swapEnd1}
                   onChange={(e) => handleNumberChange(e, setSwapEnd1)}
                   placeholder="2"
                 />
                 <span>文字目 と、</span>
-                <span style={{ marginLeft: "4px" }}>左から</span>
+                <span>左から</span>
                 <input
                   type="number"
-                  className="posInput"
+                  className="posInput changeInput2"
                   value={swapStart2}
                   onChange={(e) => handleNumberChange(e, setSwapStart2)}
                   placeholder="5"
                 />
-                <span>文字目 〜 </span>
+                <span>文字目 から </span>
                 <input
                   type="number"
-                  className="posInput"
+                  className="posInput changeInput2"
                   value={swapEnd2}
                   onChange={(e) => handleNumberChange(e, setSwapEnd2)}
                   placeholder="6"
@@ -565,7 +503,25 @@ export default function App() {
           </div>
 
           {/* 🚀 実行ボタン */}
-          <button className="executeBtn" onClick={handleRenameExecute}>
+          <button
+            className="executeBtn"
+            onClick={() =>
+              handleRenameExecute({
+                files,
+                setFiles,
+                generateNewName,
+                setStartPos,
+                setEndPos,
+                setReplaceStr,
+                setInsertPos,
+                setInsertStr,
+                setSwapStart1,
+                setSwapEnd1,
+                setSwapStart2,
+                setSwapEnd2,
+              })
+            }
+          >
             この内容で一括リネームを実行する
           </button>
         </>

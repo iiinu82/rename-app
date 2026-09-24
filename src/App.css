@@ -1,8 +1,8 @@
 /* --- プレースホルダーの文字色を薄くする設定 --- */
-.pos-input::placeholder,
-.replace-input::placeholder,
-.edit-input::placeholder {
-  color: #cbd5e1; /* お好みに応じて #94a3b8 や #cbd5e1 など薄さを調整してください */
+.posInput::placeholder,
+.replaceInput::placeholder,
+.editInput::placeholder {
+  color: #d5dae3; /* お好みに応じて #94a3b8 や #cbd5e1 など薄さを調整してください */
   opacity: 1; /* ブラウザによる色の自動薄めを防止して指定色を確実に適用するおまじない */
 }
 
@@ -179,6 +179,14 @@
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+.changeInput1 {
+  border: 2px solid #e11d48;
+}
+
+.changeInput2 {
+  border: 2px solid #0284c7;
 }
 
 .replaceInput {

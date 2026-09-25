@@ -8,6 +8,10 @@ export const handleTemporaryRename = ({
   setReplaceStr,
   setInsertPos,
   setInsertStr,
+  setInsertNum,
+  setInsertNumPos,
+  setStartNum,
+  setDigitCount,
   setSwapStart1,
   setSwapEnd1,
   setSwapStart2,
@@ -15,11 +19,13 @@ export const handleTemporaryRename = ({
 }) => {
   if (files.length === 0) return;
 
-  const targetNamesMap = files.map((file) => {
+  const targetNamesMap = files.map((file, index) => {
     if (!file.isChecked) {
       return file.currentName;
     }
-    return file.customName || generateNewName(file.currentName);
+    // 自分より前にあるチェックONの数を数える
+    const validIndex = files.slice(0, index).filter((f) => f.isChecked).length;
+    return file.customName || generateNewName(file.currentName, validIndex);
   });
 
   // 重複チェック：更新後のすべてのファイル名を集めて、重複がないかチェックする
@@ -42,7 +48,7 @@ export const handleTemporaryRename = ({
     }
     return {
       ...file,
-      currentName: targetNamesMap[index], // 先ほど検証済みの安全な名前を入れる
+      currentName: targetNamesMap[index],
       customName: "",
     };
   });
@@ -61,6 +67,10 @@ export const handleTemporaryRename = ({
   setReplaceStr("");
   setInsertPos("");
   setInsertStr("");
+  setInsertNum("");
+  setInsertNumPos("");
+  setStartNum("");
+  setDigitCount("");
   setSwapStart1("");
   setSwapEnd1("");
   setSwapStart2("");
@@ -77,6 +87,10 @@ export const handleRenameExecute = async ({
   setReplaceStr,
   setInsertPos,
   setInsertStr,
+  setInsertNum,
+  setInsertNumPos,
+  setStartNum,
+  setDigitCount,
   setSwapStart1,
   setSwapEnd1,
   setSwapStart2,
@@ -84,10 +98,14 @@ export const handleRenameExecute = async ({
 }) => {
   if (files.length === 0) return;
 
-  const finalNamesList = files.map((file) => {
+  const finalNamesList = files.map((file, index) => {
     let finalName = file.currentName;
     if (file.isChecked) {
-      finalName = file.customName || generateNewName(file.currentName);
+      const validIndex = files
+        .slice(0, index)
+        .filter((f) => f.isChecked).length;
+      finalName =
+        file.customName || generateNewName(file.currentName, validIndex);
     }
     return finalName;
   });
@@ -129,6 +147,10 @@ export const handleRenameExecute = async ({
     setReplaceStr("");
     setInsertPos("");
     setInsertStr("");
+    setInsertNum("");
+    setInsertNumPos("");
+    setStartNum("");
+    setDigitCount("");
     setSwapStart1("");
     setSwapEnd1("");
     setSwapStart2("");

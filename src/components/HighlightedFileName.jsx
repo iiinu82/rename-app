@@ -5,6 +5,7 @@ function HighlightedFileName({
   endPos,
   activeMode,
   insertPos,
+  insertNumPos,
   isChecked,
   swapStart1,
   swapEnd1,
@@ -50,7 +51,27 @@ function HighlightedFileName({
   // 2. 挿入モードのハイライト
   if (activeMode === "insert") {
     const pos = parseInt(insertPos, 10);
-    if (isNaN(pos) || pos < 0 || pos > baseName.length) {
+    if (isNaN(pos) || pos < 0 || pos - 1 > baseName.length) {
+      return <span>{targetName}</span>;
+    }
+
+    const part1 = baseName.slice(0, pos - 1);
+    const part2 = baseName.slice(pos - 1);
+
+    return (
+      <span>
+        {part1}
+        <span className="insertHighlightLine"></span>
+        {part2}
+        <span className="extensionPart">{extension}</span>
+      </span>
+    );
+  }
+
+  // 3. 連番挿入モードのハイライト
+  if (activeMode === "insertNum") {
+    const pos = parseInt(insertNumPos, 10);
+    if (isNaN(pos) || pos < 0 || pos - 1 > baseName.length) {
       return <span>{targetName}</span>;
     }
 

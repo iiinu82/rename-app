@@ -24,6 +24,11 @@ export default function App() {
   const [insertPos, setInsertPos] = useState("");
   const [insertStr, setInsertStr] = useState("");
 
+  const [insertNumPos, setInsertNumPos] = useState("");
+  const [insertNum, setInsertNum] = useState("");
+  const [startNum, setStartNum] = useState("");
+  const [digitCount, setDigitCount] = useState("2");
+
   const [swapStart1, setSwapStart1] = useState("");
   const [swapEnd1, setSwapEnd1] = useState("");
   const [swapStart2, setSwapStart2] = useState("");
@@ -32,12 +37,15 @@ export default function App() {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   // 🔄 一括変換ルールに基づいて「新しい名前」をリアルタイム計算する関数
-  const generateNewName = (baseTargetName) => {
+  const generateNewName = (baseTargetName, validIndex = 0) => {
     // 各モードのガード（何も入力されていなければそのまま返す）
     if (activeMode === "replace" && !startPos && !endPos && !replaceStr) {
       return baseTargetName;
     }
     if (activeMode === "insert" && !insertPos && !insertStr) {
+      return baseTargetName;
+    }
+    if (activeMode === "insertNum" && !insertNumPos && !insertNum) {
       return baseTargetName;
     }
     if (
@@ -62,7 +70,7 @@ export default function App() {
         baseName = before + replaceStr + after;
       }
     }
-    // 2. 挿入モード
+    // 2. 文字挿入モード
     else if (activeMode === "insert") {
       const pos = parseInt(insertPos, 10);
       if (!isNaN(pos) && pos >= 0 && pos <= baseName.length + 1) {
@@ -71,7 +79,25 @@ export default function App() {
         baseName = before + insertStr + after;
       }
     }
-    // 3. ★ 新機能：交換モード (change)
+
+    // 3. 連番挿入モード
+    else if (activeMode === "insertNum") {
+      const pos = parseInt(insertNumPos, 10);
+      if (!isNaN(pos) && pos >= 0 && pos <= baseName.length + 1) {
+        const before = baseName.slice(0, pos - 1);
+        const after = baseName.slice(pos - 1);
+
+        // 🔢 連番文字列をここでリアルタイム計算
+        const start = parseInt(startNum, 10) || 1; // 開始番号（無効なら1番から）
+        const digits = parseInt(digitCount, 10) || 1; // 桁数（無効なら1桁）
+        const currentNum = start + validIndex;
+        // 指定の桁数でゼロ埋め（例：01, 002 など）
+        const generatedNumberStr = String(currentNum).padStart(digits, "0");
+        baseName = before + generatedNumberStr + after;
+      }
+    }
+
+    // 4. 交換モード
     else if (activeMode === "change") {
       const s1 = parseInt(swapStart1, 10);
       const e1 = parseInt(swapEnd1, 10);
@@ -136,6 +162,8 @@ export default function App() {
     // ③ 1以上ならセットする
     setterFunction(num.toString());
   };
+
+  // ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
   return (
     <div className="renameContainer">
@@ -213,6 +241,14 @@ export default function App() {
                 <ModeButton
                   activeMode={activeMode}
                   setActiveMode={setActiveMode}
+                  mode="insertNum"
+                  children
+                >
+                  連番挿入
+                </ModeButton>
+                <ModeButton
+                  activeMode={activeMode}
+                  setActiveMode={setActiveMode}
                   mode="change"
                   children
                 >
@@ -236,6 +272,10 @@ export default function App() {
                       setReplaceStr,
                       setInsertPos,
                       setInsertStr,
+                      setInsertNum,
+                      setInsertNumPos,
+                      setStartNum,
+                      setDigitCount,
                       setSwapStart1,
                       setSwapEnd1,
                       setSwapStart2,
@@ -282,7 +322,7 @@ export default function App() {
 
             {/* モード2: 挿入モードの入力エリア */}
             {activeMode === "insert" && (
-              <div className="rule-row">
+              <div className="ruleRow">
                 <input
                   type="number"
                   className="posInput"
@@ -303,7 +343,45 @@ export default function App() {
                 <span>を挿入する</span>
               </div>
             )}
-            {/* 📋 モード3: 交換モードの入力エリア (change) */}
+
+            {/* モード3: 連番挿入モードの入力エリア */}
+            {activeMode === "insertNum" && (
+              <div className="ruleRow">
+                <input
+                  type="number"
+                  className="posInput"
+                  value={insertNumPos}
+                  onChange={(e) => handleNumberChange(e, setInsertNumPos)}
+                  placeholder="0"
+                  min="1"
+                  step="1"
+                />
+                <span>文字目の前に連番を挿入する。</span>
+                <span>最初の番号</span>
+                <input
+                  type="number"
+                  className="posInput"
+                  value={startNum}
+                  onChange={(e) => setStartNum(e.target.value)}
+                  placeholder="1"
+                  min="1"
+                  step="1"
+                />
+                <span>から、</span>
+                <input
+                  type="number"
+                  className="posInput"
+                  value={digitCount}
+                  onChange={(e) => setDigitCount(e.target.value)}
+                  placeholder="2"
+                  min="1"
+                  step="1"
+                />
+                <span>桁で挿入する。</span>
+              </div>
+            )}
+
+            {/* モード4: 交換モードの入力エリア*/}
             {activeMode === "change" && (
               <div className="ruleRow">
                 <input
@@ -358,9 +436,13 @@ export default function App() {
 
           <div className="previewListArea">
             {files.map((file, index) => {
+              const validIndex = files
+                .slice(0, index)
+                .filter((f) => f.isChecked).length;
               const currentPreview = !file.isChecked
                 ? file.currentName
-                : file.customName || generateNewName(file.currentName);
+                : file.customName ||
+                  generateNewName(file.currentName, validIndex);
               return (
                 <div
                   key={index}
@@ -384,6 +466,7 @@ export default function App() {
                       endPos={endPos}
                       activeMode={activeMode}
                       insertPos={insertPos}
+                      insertNumPos={insertNumPos}
                       isChecked={file.isChecked}
                       swapStart1={swapStart1}
                       swapEnd1={swapEnd1}
@@ -423,6 +506,10 @@ export default function App() {
                 setReplaceStr,
                 setInsertPos,
                 setInsertStr,
+                setInsertNum,
+                setInsertNumPos,
+                setStartNum,
+                setDigitCount,
                 setSwapStart1,
                 setSwapEnd1,
                 setSwapStart2,

@@ -22,21 +22,17 @@ function HighlightedFileName({
   // 1. 置換モードのハイライト
   if (activeMode === "replace") {
     const start = parseInt(startPos, 10);
-    const end = parseInt(endPos, 10);
+    const count = parseInt(endPos, 10);
 
-    if (
-      isNaN(start) ||
-      isNaN(end) ||
-      start <= 0 ||
-      end < start ||
-      start > baseName.length
-    ) {
+    if (isNaN(start) || isNaN(count) || start <= 0 || start > baseName.length) {
       return <span>{targetName}</span>;
     }
+    const startIndex = start - 1;
+    const endIndex = startIndex + count;
 
-    const part1 = baseName.slice(0, start - 1);
-    const part2 = baseName.slice(start - 1, end);
-    const part3 = baseName.slice(end);
+    const part1 = baseName.slice(0, startIndex);
+    const part2 = baseName.slice(startIndex, endIndex);
+    const part3 = baseName.slice(endIndex);
 
     return (
       <span>
@@ -87,40 +83,49 @@ function HighlightedFileName({
       </span>
     );
   }
-  // 3. 交換モードのハイライト（2箇所を別々の色でハイライト）
+  // 4. 交換モードのハイライト（2箇所を別々の色でハイライト）
   if (activeMode === "change") {
     const s1 = parseInt(swapStart1, 10);
-    const e1 = parseInt(swapEnd1, 10);
+    const c1 = parseInt(swapEnd1, 10);
     const s2 = parseInt(swapStart2, 10);
-    const e2 = parseInt(swapEnd2, 10);
+    const c2 = parseInt(swapEnd2, 10);
 
     // バリデーション（数値が入っていない、または範囲がおかしい場合はそのまま返す）
     if (
       isNaN(s1) ||
-      isNaN(e1) ||
+      isNaN(c1) ||
       s1 <= 0 ||
-      e1 < s1 ||
+      c1 < 0 ||
       s1 > baseName.length ||
       isNaN(s2) ||
-      isNaN(e2) ||
+      isNaN(c2) ||
       s2 <= 0 ||
-      e2 < s2 ||
+      c2 < 0 ||
       s2 > baseName.length
     ) {
       return <span>{targetName}</span>;
     }
+    const startIndex1 = s1 - 1;
+    const endIndex1 = startIndex1 + c1;
 
-    // 重複チェック
-    if (e1 >= s2) {
+    const startIndex2 = s2 - 1;
+    const endIndex2 = startIndex2 + c2;
+
+    // 💡 重複チェック（前半の終わりが、後半の始まりを超えていたらアラートを出す）
+    if (endIndex1 > startIndex2) {
       return <span className="changeCheckAlert">※範囲が重複しています</span>;
+    }
+    // 文字数がファイル全体の長さを超える場合もガード
+    if (endIndex2 > baseName.length) {
+      return <span>{targetName}</span>;
     }
 
     // 5つに分割して組み立てる（前1, 塊1, 中間, 塊2, 後2）
-    const p1 = baseName.slice(0, s1 - 1);
-    const target1 = baseName.slice(s1 - 1, e1);
-    const p2 = baseName.slice(e1, s2 - 1);
-    const target2 = baseName.slice(s2 - 1, e2);
-    const p3 = baseName.slice(e2);
+    const p1 = baseName.slice(0, startIndex1);
+    const target1 = baseName.slice(startIndex1, endIndex1);
+    const p2 = baseName.slice(endIndex1, startIndex2);
+    const target2 = baseName.slice(startIndex2, endIndex2);
+    const p3 = baseName.slice(endIndex2);
 
     return (
       <span>

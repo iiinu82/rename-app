@@ -18,7 +18,7 @@ export default function App() {
   const [activeMode, setActiveMode] = useState("replace");
 
   const [startPos, setStartPos] = useState("");
-  const [endPos, setEndPos] = useState("");
+  const [endPos, setEndPos] = useState("1");
   const [replaceStr, setReplaceStr] = useState("");
 
   const [insertPos, setInsertPos] = useState("");
@@ -30,9 +30,9 @@ export default function App() {
   const [digitCount, setDigitCount] = useState("2");
 
   const [swapStart1, setSwapStart1] = useState("");
-  const [swapEnd1, setSwapEnd1] = useState("");
+  const [swapEnd1, setSwapEnd1] = useState("1");
   const [swapStart2, setSwapStart2] = useState("");
-  const [swapEnd2, setSwapEnd2] = useState("");
+  const [swapEnd2, setSwapEnd2] = useState("1");
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
@@ -63,10 +63,12 @@ export default function App() {
     // 1. 置換モード
     if (activeMode === "replace") {
       const start = parseInt(startPos, 10);
-      const end = parseInt(endPos, 10);
-      if (!isNaN(start) && !isNaN(end) && start > 0 && end >= start) {
-        const before = baseName.slice(0, start - 1);
-        const after = baseName.slice(end);
+      const count = parseInt(endPos, 10);
+      if (!isNaN(start) && !isNaN(count) && start > 0) {
+        const startIndex = start - 1;
+        const endIndex = startIndex + count;
+        const before = baseName.slice(0, startIndex);
+        const after = baseName.slice(endIndex);
         baseName = before + replaceStr + after;
       }
     }
@@ -100,32 +102,37 @@ export default function App() {
     // 4. 交換モード
     else if (activeMode === "change") {
       const s1 = parseInt(swapStart1, 10);
-      const e1 = parseInt(swapEnd1, 10);
+      const c1 = parseInt(swapEnd1, 10);
       const s2 = parseInt(swapStart2, 10);
-      const e2 = parseInt(swapEnd2, 10);
+      const c2 = parseInt(swapEnd2, 10);
 
       // バリデーション ＆ 範囲の重複チェック（第1の終わりが第2の始まり以上なら何もしない）
       if (
         !isNaN(s1) &&
-        !isNaN(e1) &&
+        !isNaN(c1) &&
         s1 > 0 &&
-        e1 >= s1 &&
-        s1 <= baseName.length &&
+        c1 >= 0 &&
         !isNaN(s2) &&
-        !isNaN(e2) &&
+        !isNaN(c2) &&
         s2 > 0 &&
-        e2 >= s2 &&
-        s2 <= baseName.length &&
-        e1 < s2
+        c2 >= 0
       ) {
-        const p1 = baseName.slice(0, s1 - 1);
-        const target1 = baseName.slice(s1 - 1, e1); // 1つ目の塊
-        const p2 = baseName.slice(e1, s2 - 1); // 間の文字
-        const target2 = baseName.slice(s2 - 1, e2); // 2つ目の塊
-        const p3 = baseName.slice(e2); // 後ろの残り
+        const startIndex1 = s1 - 1;
+        const endIndex1 = startIndex1 + c1; // 1つ目の塊の終わり位置
 
-        // ★ 順番を入れ替えて結合する（target1 と target2 をスワップ！）
-        baseName = p1 + target2 + p2 + target1 + p3;
+        const startIndex2 = s2 - 1;
+        const endIndex2 = startIndex2 + c2; // 2つ目の塊の終わり位置
+
+        if (endIndex1 <= startIndex2 && endIndex2 <= baseName.length) {
+          const p1 = baseName.slice(0, startIndex1);
+          const target1 = baseName.slice(startIndex1, endIndex1); // 1つ目の塊
+          const p2 = baseName.slice(endIndex1, startIndex2); // 間の文字
+          const target2 = baseName.slice(startIndex2, endIndex2); // 2つ目の塊
+          const p3 = baseName.slice(endIndex2); // 後ろの残り
+
+          // ★ 順番を入れ替えて結合する（target1 と target2 をスワップ！）
+          baseName = p1 + target2 + p2 + target1 + p3;
+        }
       }
     }
 
@@ -306,9 +313,9 @@ export default function App() {
                   className="posInput"
                   value={endPos}
                   onChange={(e) => handleNumberChange(e, setEndPos)}
-                  placeholder="2"
+                  placeholder="3"
                 />
-                <span>文字目を、</span>
+                <span>文字分を、</span>
                 <input
                   type="text"
                   className="replaceInput"
@@ -399,7 +406,7 @@ export default function App() {
                   onChange={(e) => handleNumberChange(e, setSwapEnd1)}
                   placeholder="2"
                 />
-                <span>文字目 と、</span>
+                <span>文字分 と、</span>
                 <input
                   type="number"
                   className="posInput changeInput2"
@@ -415,7 +422,7 @@ export default function App() {
                   onChange={(e) => handleNumberChange(e, setSwapEnd2)}
                   placeholder="6"
                 />
-                <span>文字目を入れ替える</span>
+                <span>文字分を入れ替える</span>
               </div>
             )}
           </div>

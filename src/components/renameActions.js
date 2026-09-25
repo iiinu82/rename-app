@@ -63,18 +63,18 @@ export const handleTemporaryRename = ({
   setFiles(updatedFiles);
 
   setStartPos("");
-  setEndPos("");
+  setEndPos("1");
   setReplaceStr("");
   setInsertPos("");
   setInsertStr("");
   setInsertNum("");
   setInsertNumPos("");
   setStartNum("");
-  setDigitCount("");
+  setDigitCount("2");
   setSwapStart1("");
-  setSwapEnd1("");
+  setSwapEnd1("1");
   setSwapStart2("");
-  setSwapEnd2("");
+  setSwapEnd2("1");
 };
 
 // 実際にパソコン内のファイル名を一括で書き換える処理
@@ -143,18 +143,18 @@ export const handleRenameExecute = async ({
     // すべてのステートをきれいに初期化
     setFiles([]);
     setStartPos("");
-    setEndPos("");
+    setEndPos("1");
     setReplaceStr("");
     setInsertPos("");
     setInsertStr("");
     setInsertNum("");
     setInsertNumPos("");
     setStartNum("");
-    setDigitCount("");
+    setDigitCount("2");
     setSwapStart1("");
-    setSwapEnd1("");
+    setSwapEnd1("1");
     setSwapStart2("");
-    setSwapEnd2("");
+    setSwapEnd2("1");
   } catch (err) {
     console.error("リネーム処理中にエラーが発生しました", err);
     alert("エラーが発生しました。フォルダへの書き込み権限を確認してください。");

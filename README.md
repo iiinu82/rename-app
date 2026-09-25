@@ -1,16 +1,67 @@
-# React + Vite
+# ReName-App 📂✨
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ブラウザ完結で動作する、安全・高機能なファイル名一括変換（リネーム）ツールです。
+ファイルをサーバーに一切アップロードしないため、機密性の高い書類やプライベートな写真も安心して処理できます。
 
-Currently, two official plugins are available:
+**[https://rename-app-delta.vercel.app/]**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🌟 主な特徴
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **完全ローカル処理（圧倒的な安全性）**
+  - File System Access API を使用し、すべての処理をブラウザ内（クライアントサイド）だけで完結。大切なデータが外部に送信されることはありません。
+- **リアルタイムハイライトプレビュー**
+  - ルールを設定すると、変更対象の文字がその場でハイライトされ、変更後の名前がリアルタイムに確認できます。
+- **一括適用 ＋ 個別の手動微調整**
+  - 一括でルールを適用したあと、特定のファイルだけ右側の入力欄から個別に手動で名前を書き換えることができます。
+- **重複エラーの自動ガード**
+  - リネーム後の名前が重複してシステムエラーになるのを防ぐため、実行前に厳重なファイル名重複チェックを行います。
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠 搭載モード（機能一覧）
+
+### 1. 置換モード
+
+- 「〇文字目から〇文字目まで」を指定し、特定の文字列に一括で置き換えます。空欄にすることで指定位置の文字削除としても使えます。
+
+### 2. 文字挿入モード
+
+- 指定した文字目の前に、お好みの文字列を一括で挿入します。
+
+### 3. 連番挿入モード （★イチオシ機能）
+
+- 指定した位置に `01`, `002` といった連番を挿入します。
+- **賢い虫食い防止ロジック**: 一部のファイルのチェックボックスを外して（選択解除して）リネーム対象から除外した場合でも、連番が飛び飛びにならず、**選択されているファイルだけで綺麗に番号が詰まる**ように自動計算されます。
+
+### 4. 交換（スワップ）モード
+
+- 「〇文字目〜〇文字目」と「〇文字目〜〇文字目」の2つのブロックの文字列を、そっくりそのまま入れ替えます。
+
+---
+
+## 🚀 使い方
+
+1. **フォルダを選択**
+   - 画面のドロップゾーンにフォルダをドラッグ＆ドロップするか、「フォルダを選択する」ボタンから対象フォルダを読み込みます。
+2. **モードを選んでルールを入力**
+   - 「置換」「文字挿入」「連番挿入」「交換」からモードを選び、文字数や数値を入力します。左側のプレビューでハイライトを確認します。
+3. **（任意）変更を一旦保存する**
+   - 「置換した後に、さらに連番を振る」といった複数工程の組み合わせを行いたい場合は、「変更を一旦保存する」ボタンを押して確定させます。
+4. **一括リネームを実行**
+   - 画面最下部の「この内容で一括リネームを実行する」ボタンを押すと、パソコン内のファイル名が実際に書き換わります。
+
+---
+
+## 💻 開発環境 / 技術スタック
+
+- **Frontend**: React (Vite)
+- **API**: File System Access API (`showDirectoryPicker`, `FileSystemHandle.move`)
+- **Deployment**: Vercel
+
+---
+
+## 📄 ライセンス
+
+Copyright © 2026 T.Kawakatsu All Rights Reserved.

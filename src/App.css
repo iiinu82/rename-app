@@ -146,6 +146,20 @@
     color 0.2s;
 }
 
+.protectExtensionCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.protectExtensionCheckbox input {
+  width: 16px;
+  height: 16px;
+}
+
 /* 仮リネームボタン */
 .tempRenameBtnArea {
   display: flex;

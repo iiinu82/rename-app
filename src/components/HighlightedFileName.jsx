@@ -1,6 +1,7 @@
 // ファイル名の一部をリアルタイムにハイライト表示するコンポーネント
 function HighlightedFileName({
   targetName,
+  protectExtension,
   startPos,
   endPos,
   activeMode,
@@ -15,9 +16,15 @@ function HighlightedFileName({
   if (!isChecked) {
     return <span>{targetName}</span>;
   }
-  const dotIndex = targetName.lastIndexOf(".");
-  const baseName = dotIndex !== -1 ? targetName.slice(0, dotIndex) : targetName;
-  const extension = dotIndex !== -1 ? targetName.slice(dotIndex) : "";
+
+  let baseName = targetName;
+  let extension = "";
+
+  if (protectExtension) {
+    const dotIndex = targetName.lastIndexOf(".");
+    baseName = dotIndex !== -1 ? targetName.slice(0, dotIndex) : targetName;
+    extension = dotIndex !== -1 ? targetName.slice(dotIndex) : "";
+  }
 
   // 1. 置換モードのハイライト
   if (activeMode === "replace") {
@@ -67,6 +74,7 @@ function HighlightedFileName({
   // 3. 連番挿入モードのハイライト
   if (activeMode === "insertNum") {
     const pos = parseInt(insertNumPos, 10);
+
     if (isNaN(pos) || pos < 0 || pos - 1 > baseName.length) {
       return <span>{targetName}</span>;
     }

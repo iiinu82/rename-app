@@ -16,6 +16,7 @@ import {
 export default function App() {
   const [files, setFiles] = useState([]);
   const [activeMode, setActiveMode] = useState("replace");
+  const [protectExtension, setProtectExtension] = useState(true);
 
   const [startPos, setStartPos] = useState("");
   const [endPos, setEndPos] = useState("1");
@@ -55,10 +56,15 @@ export default function App() {
       return baseTargetName;
     }
 
-    const dotIndex = baseTargetName.lastIndexOf(".");
-    let baseName =
-      dotIndex !== -1 ? baseTargetName.slice(0, dotIndex) : baseTargetName;
-    const extension = dotIndex !== -1 ? baseTargetName.slice(dotIndex) : "";
+    let baseName = baseTargetName;
+    let extension = "";
+
+    if (protectExtension) {
+      const dotIndex = baseTargetName.lastIndexOf(".");
+      baseName =
+        dotIndex !== -1 ? baseTargetName.slice(0, dotIndex) : baseTargetName;
+      extension = dotIndex !== -1 ? baseTargetName.slice(dotIndex) : "";
+    }
 
     // 1. 置換モード
     if (activeMode === "replace") {
@@ -136,7 +142,7 @@ export default function App() {
       }
     }
 
-    return baseName + extension;
+    return protectExtension ? baseName + extension : baseName;
   };
 
   // すべてのチェックをON/OFF切り替えるトグル関数
@@ -261,6 +267,14 @@ export default function App() {
                 >
                   交換
                 </ModeButton>
+                <label className="protectExtensionCheckbox">
+                  <input
+                    type="checkbox"
+                    checked={protectExtension}
+                    onChange={(e) => setProtectExtension(e.target.checked)}
+                  />
+                  <span>拡張子を保護する</span>
+                </label>
               </div>
 
               {/* 仮リネームボタン */}
@@ -469,6 +483,7 @@ export default function App() {
                     />
                     <HighlightedFileName
                       targetName={file.currentName}
+                      protectExtension={protectExtension}
                       startPos={startPos}
                       endPos={endPos}
                       activeMode={activeMode}

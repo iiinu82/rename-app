@@ -15,10 +15,6 @@
   border-radius: 3px;
 }
 
-.extensionPart {
-  color: #999;
-}
-
 /* 交換する文字 */
 .changeCheckAlert {
   color: #e11d48;
@@ -271,6 +267,18 @@
   width: 16px;
   height: 16px;
   cursor: pointer;
+}
+
+.previewCell.edit-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.extensionPart {
+  white-space: nowrap;
+  font-size: 14px;
+  color: #999;
 }
 
 .editInput {

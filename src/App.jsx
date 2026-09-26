@@ -27,7 +27,7 @@ export default function App() {
 
   const [insertNumPos, setInsertNumPos] = useState("");
   const [insertNum, setInsertNum] = useState("");
-  const [startNum, setStartNum] = useState("");
+  const [startNum, setStartNum] = useState("1");
   const [digitCount, setDigitCount] = useState("2");
 
   const [swapStart1, setSwapStart1] = useState("");
@@ -455,20 +455,47 @@ export default function App() {
             </div>
           </div>
 
+          {/* リスト表示 */}
           <div className="previewListArea">
             {files.map((file, index) => {
+              // チェックが入っているリストにつけられている番号（連番挿入で使う）
               const validIndex = files
                 .slice(0, index)
                 .filter((f) => f.isChecked).length;
-              const currentPreview = !file.isChecked
-                ? file.currentName
+
+              // 1. 現在のファイル名から「本体」と「拡張子」を安全にスライスする
+              const dotIndex = file.currentName.lastIndexOf(".");
+              // 拡張子部分(拡張子保護なら拡張子部分。保護していないなら無し)
+              const fileExtension =
+                protectExtension && dotIndex !== -1
+                  ? file.currentName.slice(dotIndex)
+                  : "";
+              // 拡張子以外の部分(拡張子保護で拡張子があるなら前半部分。そうでないなら全部)
+              const fileBaseNameOnly =
+                protectExtension && dotIndex !== -1
+                  ? file.currentName.slice(0, dotIndex)
+                  : file.currentName;
+
+              // 2. 💡 ルール適用時のベース：
+              // 拡張子保護されているなら前半部分。そうでないなら左側の表示そのまま
+              const ruleTargetName = protectExtension
+                ? fileBaseNameOnly
+                : file.currentName;
+
+              // 3. 選択されていないならばruleTargetName、されているなら左側の名前そのままか全体ルール適応後の名前がprocessedNameに入る
+              const processedName = !file.isChecked
+                ? ruleTargetName
                 : file.customName ||
-                  generateNewName(file.currentName, validIndex);
+                  generateNewName(ruleTargetName, validIndex);
+
+              // 4. 最終的にインプットに表示する値（保護中は本体のみ、OFFならそのまま）
+              const currentPreview = processedName;
+
               return (
                 <div
                   key={index}
                   className="previewRow"
-                  style={{ opacity: file.isChecked ? 1 : 0.7 }} // チェック外れたら少し薄くする
+                  style={{ opacity: file.isChecked ? 1 : 0.7 }}
                 >
                   {/* 左：チェックボックス ＋ リアルタイムハイライト */}
                   <div className="previewCell originalCell">
@@ -496,7 +523,8 @@ export default function App() {
                       swapEnd2={swapEnd2}
                     />
                   </div>
-                  {/* 右：変更後の入力フォーム */}
+
+                  {/* 右：変更後の入力フォーム ＋ 拡張子ラベル */}
                   <div className="previewCell edit-cell">
                     <input
                       type="text"
@@ -505,10 +533,18 @@ export default function App() {
                       disabled={!file.isChecked}
                       onChange={(e) => {
                         const newFiles = [...files];
-                        newFiles[index].customName = e.target.value;
+                        const userInput = e.target.value;
+                        // 💡 保護中なら、ユーザーが入力した本体に拡張子を再度くっつけて customName として保存する
+                        newFiles[index].customName = protectExtension
+                          ? userInput + fileExtension
+                          : userInput;
                         setFiles(newFiles);
                       }}
                     />
+                    {/* 💡 拡張子を守るがONのときは、後ろに拡張子をグレーの文字で固定表示する */}
+                    {protectExtension && fileExtension && (
+                      <span className="extensionPart">{fileExtension}</span>
+                    )}
                   </div>
                 </div>
               );

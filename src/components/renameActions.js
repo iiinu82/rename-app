@@ -69,7 +69,7 @@ export const handleTemporaryRename = ({
   setInsertStr("");
   setInsertNum("");
   setInsertNumPos("");
-  setStartNum("");
+  setStartNum("1");
   setDigitCount("2");
   setSwapStart1("");
   setSwapEnd1("1");
@@ -149,7 +149,7 @@ export const handleRenameExecute = async ({
     setInsertStr("");
     setInsertNum("");
     setInsertNumPos("");
-    setStartNum("");
+    setStartNum("1");
     setDigitCount("2");
     setSwapStart1("");
     setSwapEnd1("1");

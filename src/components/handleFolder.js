@@ -62,13 +62,10 @@ export const handleDrop = async (e, setIsDraggingOver, setFiles) => {
             }
           }
         } else if (handle.kind === "file") {
-          fileList.push({
-            handle: handle,
-            originalName: handle.name,
-            currentName: handle.name,
-            customName: "",
-            isChecked: true,
-          });
+          alert(
+            "ファイルではなく、「フォルダごと」ドラッグ＆ドロップしてください。",
+          );
+          return;
         }
       }
     }

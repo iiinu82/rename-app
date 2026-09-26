@@ -462,27 +462,35 @@ export default function App() {
               const validIndex = files
                 .slice(0, index)
                 .filter((f) => f.isChecked).length;
-
+              //! ファイル名には「〇〇〇〇.mp3」と「✕✕✕✕」の可能性があるとして
               // 1. 現在のファイル名から「本体」と「拡張子」を安全にスライスする
               const dotIndex = file.currentName.lastIndexOf(".");
-              // 拡張子部分(拡張子保護なら拡張子部分。保護していないなら無し)
+              // 拡張子部分(拡張子保護 かつ 拡張子あり なら fileExtension = .mp3
               const fileExtension =
                 protectExtension && dotIndex !== -1
                   ? file.currentName.slice(dotIndex)
                   : "";
-              // 拡張子以外の部分(拡張子保護で拡張子があるなら前半部分。そうでないなら全部)
+
+              // 拡張子保護 かつ 拡張子がある？ ＝＞ fileBaseNameOnly
+              //? 拡張子保護 かつ 拡張子がある ＝＞ 〇〇〇〇
+              //? 拡張子保護 拡張子なし ＝＞ ✕✕✕✕（そのまま）
+              //? 拡張子保護なし 拡張子あり ＝＞ 〇〇〇〇.mp3
+              //? 拡張子保護なし 拡張子なし ＝＞ ✕✕✕✕（そのまま）
               const fileBaseNameOnly =
                 protectExtension && dotIndex !== -1
                   ? file.currentName.slice(0, dotIndex)
                   : file.currentName;
 
-              // 2. 💡 ルール適用時のベース：
-              // 拡張子保護されているなら前半部分。そうでないなら左側の表示そのまま
+              // 2. 拡張子保護？保護しない？ ＝＞ ruleTargetName
+              //? 拡張子保護 ＝＞ 〇〇〇〇 or ✕✕✕✕（そのまま）
+              //? 拡張子保護なし ＝＞ 〇〇〇〇.mp3 or ✕✕✕✕（そのまま）
               const ruleTargetName = protectExtension
                 ? fileBaseNameOnly
                 : file.currentName;
 
-              // 3. 選択されていないならばruleTargetName、されているなら左側の名前そのままか全体ルール適応後の名前がprocessedNameに入る
+              // 3. 編集可能？不可能？ ＝＞ processedName
+              //? 編集不可状態 ＝＞ ruleTargetName つまり 拡張保護あり〇〇〇〇、拡張保護なし〇〇〇〇.mp3
+              //? 編集可能状態 ＝＞ 編集した名前 がなければ 左側の名前
               const processedName = !file.isChecked
                 ? ruleTargetName
                 : file.customName ||
@@ -490,6 +498,10 @@ export default function App() {
 
               // 4. 最終的にインプットに表示する値（保護中は本体のみ、OFFならそのまま）
               const currentPreviewDotIndex = processedName.lastIndexOf(".");
+              //? 拡張子保護 かつ 拡張子がある ＝＞ 〇〇〇〇
+              //? 拡張子保護 拡張子なし ＝＞ 〇〇〇〇 or ✕✕✕✕
+              //? 拡張子保護なし 拡張子あり ＝＞ 〇〇〇〇.mp3
+              //? 拡張子保護なし 拡張子なし ＝＞ 〇〇〇〇 or ✕✕✕✕
               const currentPreview =
                 protectExtension && currentPreviewDotIndex !== -1
                   ? processedName.slice(0, currentPreviewDotIndex)
@@ -537,13 +549,13 @@ export default function App() {
                       disabled={!file.isChecked}
                       onChange={(e) => {
                         const newFiles = [...files];
+                        // userInputはcurrentPreviewを編集したもの
                         const userInput = e.target.value;
-
-                        // 💡 ユーザーが入力した文字（例: "あ"）に、保護中なら拡張子（例: ".mp3"）をくっつける ("あ.mp3")
+                        //? 拡張子保護 ＝＞ 〇〇〇〇 + .mp3 or ✕✕✕✕ + "" をcustomNameに保存
+                        //? 拡張子保護なし ＝＞ 〇〇〇〇.mp3 or ✕✕✕✕ をcustomNameに保存
                         newFiles[index].customName = protectExtension
                           ? userInput + fileExtension
                           : userInput;
-
                         setFiles(newFiles);
                       }}
                     />

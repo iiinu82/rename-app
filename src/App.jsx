@@ -489,7 +489,11 @@ export default function App() {
                   generateNewName(ruleTargetName, validIndex);
 
               // 4. 最終的にインプットに表示する値（保護中は本体のみ、OFFならそのまま）
-              const currentPreview = processedName;
+              const currentPreviewDotIndex = processedName.lastIndexOf(".");
+              const currentPreview =
+                protectExtension && currentPreviewDotIndex !== -1
+                  ? processedName.slice(0, currentPreviewDotIndex)
+                  : processedName;
 
               return (
                 <div
@@ -534,10 +538,12 @@ export default function App() {
                       onChange={(e) => {
                         const newFiles = [...files];
                         const userInput = e.target.value;
-                        // 💡 保護中なら、ユーザーが入力した本体に拡張子を再度くっつけて customName として保存する
+
+                        // 💡 ユーザーが入力した文字（例: "あ"）に、保護中なら拡張子（例: ".mp3"）をくっつける ("あ.mp3")
                         newFiles[index].customName = protectExtension
                           ? userInput + fileExtension
                           : userInput;
+
                         setFiles(newFiles);
                       }}
                     />

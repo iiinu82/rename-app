@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import ModeButton from "./components/ModeButton";
 import HighlightedFileName from "./components/HighlightedFileName";
@@ -36,6 +36,22 @@ export default function App() {
   const [swapEnd2, setSwapEnd2] = useState("1");
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+
+  useEffect(() => {
+    const preventDefaultGlobal = (e) => {
+      e.preventDefault();
+    };
+
+    // 画面全体での dragover と drop をブロックする
+    window.addEventListener("dragover", preventDefaultGlobal);
+    window.addEventListener("drop", preventDefaultGlobal);
+
+    // コンポーネントが消えるときにイベントを解除するお掃除処理
+    return () => {
+      window.removeEventListener("dragover", preventDefaultGlobal);
+      window.removeEventListener("drop", preventDefaultGlobal);
+    };
+  }, []);
 
   // 🔄 一括変換ルールに基づいて「新しい名前」をリアルタイム計算する関数
   const generateNewName = (baseTargetName, validIndex = 0) => {

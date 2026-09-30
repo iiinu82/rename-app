@@ -75,12 +75,12 @@ export default function App() {
     let baseName = baseTargetName;
     let extension = "";
 
-    if (protectExtension) {
-      const dotIndex = baseTargetName.lastIndexOf(".");
-      baseName =
-        dotIndex !== -1 ? baseTargetName.slice(0, dotIndex) : baseTargetName;
-      extension = dotIndex !== -1 ? baseTargetName.slice(dotIndex) : "";
-    }
+    // if (protectExtension) {
+    //   const dotIndex = baseTargetName.lastIndexOf(".");
+    //   baseName =
+    //     dotIndex !== -1 ? baseTargetName.slice(0, dotIndex) : baseTargetName;
+    //   extension = dotIndex !== -1 ? baseTargetName.slice(dotIndex) : "";
+    // }
 
     // 1. 置換モード
     if (activeMode === "replace") {
@@ -478,7 +478,7 @@ export default function App() {
               const validIndex = files
                 .slice(0, index)
                 .filter((f) => f.isChecked).length;
-              //! ファイル名には「〇〇〇〇.mp3」と「✕✕✕✕」の可能性があるとして
+              //! ファイル名には「〇〇.〇〇.mp3」と「✕✕✕✕」の可能性があるとして
               // 1. 現在のファイル名から「本体」と「拡張子」を安全にスライスする
               const dotIndex = file.currentName.lastIndexOf(".");
               // 拡張子部分(拡張子保護 かつ 拡張子あり なら fileExtension = .mp3
@@ -488,7 +488,7 @@ export default function App() {
                   : "";
 
               // 拡張子保護 かつ 拡張子がある？ ＝＞ fileBaseNameOnly
-              //? 拡張子保護 かつ 拡張子がある ＝＞ 〇〇〇〇
+              //? 拡張子保護 かつ 拡張子がある ＝＞ 〇〇.〇〇
               //? 拡張子保護 拡張子なし ＝＞ ✕✕✕✕（そのまま）
               //? 拡張子保護なし 拡張子あり ＝＞ 〇〇〇〇.mp3
               //? 拡張子保護なし 拡張子なし ＝＞ ✕✕✕✕（そのまま）
@@ -498,7 +498,7 @@ export default function App() {
                   : file.currentName;
 
               // 2. 拡張子保護？保護しない？ ＝＞ ruleTargetName
-              //? 拡張子保護 ＝＞ 〇〇〇〇 or ✕✕✕✕（そのまま）
+              //? 拡張子保護 ＝＞ 〇〇.〇〇 or ✕✕✕✕（そのまま）
               //? 拡張子保護なし ＝＞ 〇〇〇〇.mp3 or ✕✕✕✕（そのまま）
               const ruleTargetName = protectExtension
                 ? fileBaseNameOnly
@@ -514,14 +514,15 @@ export default function App() {
 
               // 4. 最終的にインプットに表示する値（保護中は本体のみ、OFFならそのまま）
               const currentPreviewDotIndex = processedName.lastIndexOf(".");
-              //? 拡張子保護 かつ 拡張子がある ＝＞ 〇〇〇〇
+              //? 拡張子保護 かつ 拡張子がある ＝＞ 〇〇.〇〇
               //? 拡張子保護 拡張子なし ＝＞ 〇〇〇〇 or ✕✕✕✕
               //? 拡張子保護なし 拡張子あり ＝＞ 〇〇〇〇.mp3
               //? 拡張子保護なし 拡張子なし ＝＞ 〇〇〇〇 or ✕✕✕✕
-              const currentPreview =
-                protectExtension && currentPreviewDotIndex !== -1
-                  ? processedName.slice(0, currentPreviewDotIndex)
-                  : processedName;
+              // const currentPreview =
+              //   protectExtension && currentPreviewDotIndex !== -1
+              //     ? processedName.slice(0, currentPreviewDotIndex)
+              //     : processedName;
+              const currentPreview = processedName;
 
               return (
                 <div

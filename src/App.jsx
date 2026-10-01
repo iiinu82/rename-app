@@ -12,6 +12,7 @@ import {
   handleDragOver,
   handleDragLeave,
 } from "./components/handleFolder";
+import HowToUseModal from "./components/HowToUseModal";
 
 export default function App() {
   const [files, setFiles] = useState([]);
@@ -36,6 +37,7 @@ export default function App() {
   const [swapEnd2, setSwapEnd2] = useState("1");
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
   useEffect(() => {
     const preventDefaultGlobal = (e) => {
@@ -199,7 +201,15 @@ export default function App() {
       <div className="titleArea">
         <h1 className="renameTitle">一括リネームツール</h1>
         <p>複数のファイル名を一気に変更する</p>
+        <button className="openModalBtn" onClick={() => setIsOpenModal(true)}>
+          使い方ガイド
+        </button>
       </div>
+      {/* ★ モーダルの呼び出し */}
+      <HowToUseModal
+        isOpen={isOpenModal}
+        onClose={() => setIsOpenModal(false)}
+      />
       <div className="secondArea">
         {files.length !== 0 ? (
           <button
@@ -213,11 +223,33 @@ export default function App() {
           ""
         )}
         <div className="descArea">
-          <p className="rename-desc">
-            ※ファイルはサーバーにアップロードされず、あなたのブラウザ内だけで安全に処理されます。
+          <p
+            className="rename-desc"
+            style={{
+              color: "red",
+            }}
+          >
+            ※必ず右上の「使い方ガイド」から使い方ガイドをお読みになってから使用してください。
+          </p>
+          <p
+            className="rename-desc"
+            style={{
+              color: "red",
+            }}
+          >
+            ※
+            ファイル単位では選択出来ません。（ブラウザのセキュリティ上、ファイルが選択された時はリネームが出来ません）
           </p>
           <p className="rename-desc">
-            ※ブラウザによってはフォルダが選択出来ない場合があります。ChromeやEdgeでお試し下さい。
+            ※ 同様に、フォルダ名もリネームが出来ません。
+          </p>
+          <p className="rename-desc">
+            ※
+            ファイルはサーバーにアップロードされず、あなたのブラウザ内だけで安全に処理されます。
+          </p>
+          <p className="rename-desc">
+            ※
+            ブラウザによってはフォルダが選択出来ない場合があります。ChromeやEdgeでお試し下さい。
           </p>
         </div>
       </div>

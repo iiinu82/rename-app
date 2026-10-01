@@ -46,9 +46,11 @@
 }
 
 .titleArea {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 10px;
   gap: 20px;
   border-bottom: 2px solid #0070f3;
 }
@@ -61,6 +63,29 @@
   color: #454545;
 }
 
+.openModalBtn {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  /* width: 80px; */
+  padding: 5px 10px;
+  background-color: #2fc352;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.1s;
+  box-shadow: 0 2px 0 #1e7e34;
+  transform: translateY(-50%);
+}
+
+.openModalBtn:hover {
+  background-color: #218838;
+  transform: translateY(calc(-50% + 2px));
+  box-shadow: 0 0 0 #1e7e34;
+}
 .rename-desc {
   /* margin-top: 10px; */
   text-align: center;
@@ -233,9 +258,10 @@
 }
 
 .previewListArea {
-  max-height: 400px;
+  max-height: 600px;
   overflow-y: auto;
   margin-bottom: 20px;
+  border-bottom: 2px solid #ddd;
 }
 
 .previewRow {
@@ -377,4 +403,84 @@ footer {
   color: #818181;
   margin-top: 30px;
   margin-right: 20px;
+}
+
+/* 使い方モーダル */
+/* モーダルの背景（オーバーレイ） */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.howToUseContent {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.red {
+  color: #e11d48;
+}
+
+.howToUseTitle {
+  font-size: 22px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.howToUseDesc {
+  font-size: 14px;
+  color: #e11d48;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* 手順のリスト（<ol>） */
+.howToUseOl {
+  text-align: left;
+  width: 100%;
+  padding-left: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.howToUseOl li {
+  padding-left: 4px;
+}
+
+/* 閉じるボタン */
+.closeBtn {
+  background-color: #4b5563;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.closeBtn:hover {
+  background-color: #374151;
 }

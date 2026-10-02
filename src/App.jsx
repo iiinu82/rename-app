@@ -493,6 +493,10 @@ export default function App() {
           <div className="previewHeader">
             <div className="previewCol">
               <span>現在のファイル名（変更対象）</span>
+              <span className="isCheckedCounter">
+                ({files.filter((f) => f.isChecked).length} / {files.length}件
+                選択中)
+              </span>
               {/* ★ すべてのチェックを切り替えるボタン */}
               <button onClick={handleToggleAllCheck} className="toggleCheckBtn">
                 {files.every((f) => f.isChecked) ? "すべて解除" : "すべて選択"}
@@ -520,7 +524,7 @@ export default function App() {
                   : "";
 
               // 拡張子保護 かつ 拡張子がある？ ＝＞ fileBaseNameOnly
-              //? 拡張子保護 かつ 拡張子がある ＝＞ 〇〇.〇〇
+              //? 拡張子保護 かつ 拡張子がある ＝＞ 〇〇.〇〇 (.mp3を取り除く)
               //? 拡張子保護 拡張子なし ＝＞ ✕✕✕✕（そのまま）
               //? 拡張子保護なし 拡張子あり ＝＞ 〇〇〇〇.mp3
               //? 拡張子保護なし 拡張子なし ＝＞ ✕✕✕✕（そのまま）
@@ -536,25 +540,14 @@ export default function App() {
                 ? fileBaseNameOnly
                 : file.currentName;
 
-              // 3. 編集可能？不可能？ ＝＞ processedName
-              //? 編集不可状態 ＝＞ ruleTargetName つまり 拡張保護あり〇〇〇〇、拡張保護なし〇〇〇〇.mp3
-              //? 編集可能状態 ＝＞ 編集した名前 がなければ 左側の名前
-              const processedName = !file.isChecked
+              // 3. 編集可能？不可能？ ＝＞ currentPreview(変更後のファイル名に表示される名前)
+              //? 編集不可状態 ＝＞ ruleTargetName つまり currentName（現在のファイル名)が拡張保護ありなら〇〇〇〇、拡張保護なしなら〇〇〇〇.mp3が表示される
+              //? 編集可能状態 ＝＞ 個別に編集した名前 がなければ ルール適応後の名前
+              //? ※generateNewNameは、ルールの数字が入っていない時は渡されたruleTargetNameがそのまま返される
+              const currentPreview = !file.isChecked
                 ? ruleTargetName
                 : file.customName ||
                   generateNewName(ruleTargetName, validIndex);
-
-              // 4. 最終的にインプットに表示する値（保護中は本体のみ、OFFならそのまま）
-              const currentPreviewDotIndex = processedName.lastIndexOf(".");
-              //? 拡張子保護 かつ 拡張子がある ＝＞ 〇〇.〇〇
-              //? 拡張子保護 拡張子なし ＝＞ 〇〇〇〇 or ✕✕✕✕
-              //? 拡張子保護なし 拡張子あり ＝＞ 〇〇〇〇.mp3
-              //? 拡張子保護なし 拡張子なし ＝＞ 〇〇〇〇 or ✕✕✕✕
-              // const currentPreview =
-              //   protectExtension && currentPreviewDotIndex !== -1
-              //     ? processedName.slice(0, currentPreviewDotIndex)
-              //     : processedName;
-              const currentPreview = processedName;
 
               return (
                 <div

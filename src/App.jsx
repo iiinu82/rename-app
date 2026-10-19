@@ -544,11 +544,19 @@ export default function App() {
               //? 編集不可状態 ＝＞ ruleTargetName つまり currentName（現在のファイル名)が拡張保護ありなら〇〇〇〇、拡張保護なしなら〇〇〇〇.mp3が表示される
               //? 編集可能状態 ＝＞ 個別に編集した名前 がなければ ルール適応後の名前
               //? ※generateNewNameは、ルールの数字が入っていない時は渡されたruleTargetNameがそのまま返される
+
+              const stripExtension = (name, ext) =>
+                protectExtension && ext && name.endsWith(ext)
+                  ? name.slice(0, -ext.length)
+                  : name;
+
               const currentPreview = !file.isChecked
                 ? ruleTargetName
-                : file.customName ||
-                  generateNewName(ruleTargetName, validIndex);
-
+                : stripExtension(
+                    file.customName ||
+                      generateNewName(ruleTargetName, validIndex),
+                    fileExtension,
+                  );
               return (
                 <div
                   key={index}
